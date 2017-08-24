@@ -29,13 +29,16 @@ app.get('/todos',(req, res) => {
   });
 });
 
-// GET /todos/12341234
+// GET /todos/5989477e8d4cff6c05438703
 
 app.get('/todos/:id', (req,res) => {
   var id = req.params.id;
 
   //Validate ID using isValid
     // Respond with 404 - send back empty body
+  if(!ObjectID.isValid(id)) {
+    res.status(404).send(req.params.body);
+  };
 
   // findById
     // Success
@@ -43,6 +46,12 @@ app.get('/todos/:id', (req,res) => {
       // if no todo - send back 404 with empty body
     // Error
       //400 - and send empty body back
+  Todo.findById(id).then((then) => {
+    if(!todo) {
+      res.status(404).send(req.params.body);
+    };
+    console.log('Todo by id: ')
+  })
 });
 
 app.listen(3000, () => {
