@@ -85,9 +85,10 @@ describe('GET /todos/:id', () => {
   });
 
   it('should return 404 if todo not found', (done) => {
-    //make sure you get a 404 back
+    var hexID = new ObjectID().toHexString();
+
     request(app)
-      .get(`/todos/000000000000000000000000`)
+      .get(`/todos/${hexID}`)
       .expect(404)
       .end(done)
   });
@@ -98,5 +99,58 @@ describe('GET /todos/:id', () => {
       .get('/todos/123')
       .expect(404)
       .end(done)
-  })
+  });
+});
+
+// var hexID = todos[1]._id.toHexString();
+// var notHexID = todos[1]._id
+//
+// // Used to idenfity the difference between Hex ID and Non Hex ID
+// console.log(`This is Hex ID: ${hexID}`);
+// console.log(`This is not Hex ID: ${notHexID}`);
+// if(hexID == notHexID) {
+//   console.log('true');
+// } else {
+//   console.log('false');
+// };
+
+describe('DELETE /todos/:id', () => {
+  it('should remove a todo', (done) => {
+    var hexId = todos[1]._id.toHexString();
+
+    request(app)
+      .delete(`/todos/${hexId}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo._id).toBe(hexId);
+      })
+      .end((err,res) => {
+        if(err) {
+          return done(err);
+        }
+
+        // query database using findById toNotExist
+        //expect(null).toNotExist
+        Todo.findById(hexId).then((todos) => {
+          expect(todos).toNotExist();
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+
+  it('should return 404 if todo not found', (done) => {
+    var hexID = new ObjectID().toHexString();
+
+    request(app)
+      .delete(`/todos/${hexID}`)
+      .expect(404)
+      .end(done)
+  });
+
+  it('should return 404 if ObjectID is invalid', (done) => {
+    request(app)
+      .delete('/todos/123')
+      .expect(404)
+      .end(done)
+  });
 });
